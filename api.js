@@ -3,7 +3,7 @@
    Talks to our own backend at /api/* (see server.js)
    ============================================================ */
 
-const API_BASE = '/api';
+const API_BASE = 'back-end-of-crochet-website-production-dd428d61.up.railway.app';
 
 /* ---------- Cart identity (per-browser, stored in localStorage) ---------- */
 function getCartId() {
