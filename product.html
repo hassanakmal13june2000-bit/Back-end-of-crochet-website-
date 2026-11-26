@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Loading… — Hook &amp; Hearth</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="wordmark">Hook <span class="amp">&amp;</span> Hearth</a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="index.html#about">Our Craft</a>
+    </nav>
+    <div class="nav-icons">
+      <a href="cart.html" class="cart-link" aria-label="Cart">🧺<span class="cart-badge">0</span></a>
+      <button class="mob-toggle" onclick="toggleMobNav()" aria-label="Menu">☰</button>
+    </div>
+  </div>
+  <nav id="mobNav" style="display:none;flex-direction:column;padding:0 24px 18px;gap:14px">
+    <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="index.html#about">Our Craft</a>
+  </nav>
+</header>
+
+<div class="container" style="padding-top:28px">
+  <div class="crumb"><a href="index.html">Home</a> › <a href="shop.html">Shop</a> › <span id="crumbName">Loading…</span></div>
+
+  <div class="pdp">
+    <div class="swatch-wrap" id="pdpSwatch"></div>
+    <div>
+      <span class="eyebrow" id="pdpCategory">—</span>
+      <h1 class="pdp-title" id="pdpName">Loading…</h1>
+      <div class="pdp-price" id="pdpPrice">$0.00</div>
+      <p class="pdp-desc" id="pdpDesc">Loading description…</p>
+
+      <div class="spec-row">
+        <div class="spec"><span class="label">Yarn weight</span><span class="val" id="pdpWeight">—</span></div>
+        <div class="spec"><span class="label">Hook time</span><span class="val" id="pdpHours">—</span></div>
+        <div class="spec"><span class="label">Stitch</span><span class="val" id="pdpPattern">—</span></div>
+      </div>
+
+      <p class="stock-note" id="pdpStock"></p>
+
+      <div class="qty-row">
+        <div class="qty-box">
+          <button onclick="changeQty(-1)" aria-label="Decrease quantity">−</button>
+          <input id="qty" value="1" readonly>
+          <button onclick="changeQty(1)" aria-label="Increase quantity">+</button>
+        </div>
+        <button class="btn" id="addBtn" onclick="handleAdd()">Add to cart</button>
+      </div>
+      <a href="cart.html" class="btn outline block" style="margin-top:8px">View cart</a>
+    </div>
+  </div>
+</div>
+
+<div class="stitch-divider mt-40" aria-hidden="true"></div>
+
+<section>
+  <div class="container">
+    <div class="section-head">
+      <div><span class="eyebrow">More like this</span><h2>You might also like</h2></div>
+    </div>
+    <div class="grid" id="relatedGrid"></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="wordmark">Hook <span class="amp" style="color:var(--mustard)">&amp;</span> Hearth</div>
+        <p style="max-width:32ch;color:#B9AE9E;margin-top:10px;font-size:14px">Small-batch crochet, made one row at a time in a home studio.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col"><h4>Shop</h4><a href="shop.html">All pieces</a></div>
+        <div class="footer-col"><h4>Help</h4><a href="cart.html">Your cart</a><a href="mailto:hello@hookandhearth.example">Contact</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Hook &amp; Hearth.</span>
+      <span>Care: hand wash cold, lay flat to dry.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+function toggleMobNav(){
+  var el = document.getElementById('mobNav');
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+var currentProduct = null;
+
+function getIdFromUrl(){
+  var params = new URLSearchParams(window.location.search);
+  return parseInt(params.get('id'), 10) || 1;
+}
+
+function changeQty(delta){
+  var inp = document.getElementById('qty');
+  var v = Math.max(1, parseInt(inp.value, 10) + delta);
+  if (currentProduct) v = Math.min(v, Math.max(1, currentProduct.stock));
+  inp.value = v;
+}
+
+function handleAdd(){
+  if (!currentProduct) return;
+  var qty = parseInt(document.getElementById('qty').value, 10) || 1;
+  addToCart(currentProduct.id, qty).then(function(){
+    toast('Added "' + currentProduct.name + '" to your cart');
+  }).catch(function(err){
+    toast('Could not add to cart: ' + err.message);
+  });
+}
+
+function relatedCard(p){
+  return '' +
+    '<a class="card" href="product.html?id=' + p.id + '">' +
+      '<div class="swatch-wrap">' + productVisual(p) + '</div>' +
+      '<div class="body"><h3>' + escapeHtml(p.name) + '</h3><span class="price">' + formatPrice(p.price) + '</span></div>' +
+    '</a>';
+}
+
+var id = getIdFromUrl();
+
+fetchProduct(id).then(function(p){
+  currentProduct = p;
+  document.getElementById('pageTitle').textContent = p.name + ' — Hook & Hearth';
+  document.getElementById('crumbName').textContent = p.name;
+  document.getElementById('pdpSwatch').innerHTML = productVisual(p);
+  document.getElementById('pdpCategory').textContent = p.category;
+  document.getElementById('pdpName').textContent = p.name;
+  document.getElementById('pdpPrice').textContent = formatPrice(p.price);
+  document.getElementById('pdpDesc').textContent = p.description;
+  document.getElementById('pdpWeight').textContent = p.yarn_weight;
+  document.getElementById('pdpHours').textContent = p.hours + ' hours';
+  document.getElementById('pdpPattern').textContent = p.pattern.charAt(0).toUpperCase() + p.pattern.slice(1) + ' stitch';
+
+  var stockEl = document.getElementById('pdpStock');
+  if (p.stock <= 0){
+    stockEl.textContent = 'Out of stock — check back soon';
+    stockEl.classList.add('low');
+    document.getElementById('addBtn').disabled = true;
+  } else if (p.stock <= 3){
+    stockEl.textContent = 'Only ' + p.stock + ' left in this colorway';
+    stockEl.classList.add('low');
+  } else {
+    stockEl.textContent = 'In stock and ready to ship';
+  }
+
+  return fetchProducts(p.category);
+}).then(function(related){
+  var filtered = related.filter(function(p){ return p.id !== id; }).slice(0, 4);
+  document.getElementById('relatedGrid').innerHTML = filtered.length
+    ? filtered.map(relatedCard).join('')
+    : '<p style="color:var(--ink-soft)">No other pieces in this category yet.</p>';
+}).catch(function(err){
+  document.getElementById('pdpName').textContent = 'Could not load this piece';
+  document.getElementById('pdpDesc').textContent = err.message;
+  console.error(err);
+});
+</script>
+</body>
+</html>

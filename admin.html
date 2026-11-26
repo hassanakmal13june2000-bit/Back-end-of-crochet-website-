@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Admin — Hook &amp; Hearth</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.adm-wrap{max-width:1100px;margin:0 auto;padding:32px 24px 80px}
+.adm-login{max-width:360px;margin:70px auto;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px}
+.adm-tabs{display:flex;gap:8px;margin-bottom:24px;border-bottom:1px solid var(--line)}
+.adm-tabs button{background:none;border:none;padding:12px 18px;font-weight:700;color:var(--ink-soft);border-bottom:3px solid transparent}
+.adm-tabs button.on{color:var(--berry);border-bottom-color:var(--berry)}
+.adm-grid{display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start}
+@media(max-width:900px){.adm-grid{grid-template-columns:1fr}}
+.adm-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.adm-card h3{font-size:18px;margin-bottom:16px}
+.adm-card select{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius);background:#fff}
+.adm-card input[type=color]{padding:2px;height:44px}
+.adm-card input[type=file]{padding:8px;background:#fff}
+.img-preview{width:100%;aspect-ratio:4/3;background:var(--paper-2);border-radius:var(--radius);overflow:hidden;margin-bottom:12px;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:13px}
+.img-preview img{width:100%;height:100%;object-fit:cover}
+.prod-row{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.prod-row .thumb{width:64px;height:64px;border-radius:var(--radius);overflow:hidden;background:var(--paper-2)}
+.prod-row .thumb svg,.prod-row .thumb img{width:100%;height:100%;object-fit:cover}
+.prod-row h4{font-size:15px}
+.prod-row .sub{font-size:12px;color:var(--ink-soft)}
+.row-actions{display:flex;gap:8px}
+.msg{font-size:13px;margin-top:10px;min-height:18px}
+.msg.err{color:var(--berry)}
+.msg.ok{color:var(--moss)}
+.order-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+.order-head{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.order-head .num{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--berry)}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="wordmark">Hook <span class="amp">&amp;</span> Hearth <span style="font-size:12px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace">/ admin</span></a>
+    <div class="nav-icons">
+      <a href="index.html" class="btn outline small">View shop</a>
+      <button class="btn small hidden" id="logoutBtn" onclick="logout()">Log out</button>
+    </div>
+  </div>
+</header>
+
+<!-- LOGIN -->
+<div class="adm-login" id="loginBox">
+  <h3 style="margin-bottom:6px">Admin login</h3>
+  <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px">Enter the admin password to manage products and orders.</p>
+  <form onsubmit="doLogin(event)">
+    <div class="field"><label for="pw">Password</label><input id="pw" type="password" required autocomplete="current-password"></div>
+    <button class="btn block" type="submit">Log in</button>
+    <p class="msg" id="loginMsg"></p>
+  </form>
+</div>
+
+<!-- PANEL -->
+<div class="adm-wrap hidden" id="panel">
+  <div class="adm-tabs">
+    <button class="on" id="tabProducts" onclick="showTab('products')">Products</button>
+    <button id="tabOrders" onclick="showTab('orders')">Orders</button>
+  </div>
+
+  <div id="productsTab">
+    <div class="adm-grid">
+      <div class="adm-card">
+        <h3 id="formTitle">Add a product</h3>
+        <form id="prodForm" onsubmit="saveProduct(event)">
+          <div class="img-preview" id="imgPreview">No photo — a crochet swatch is shown instead</div>
+          <div class="field"><label for="fImage">Photo (optional)</label><input id="fImage" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onchange="pickImage(this)"></div>
+          <button type="button" class="btn outline small hidden" id="clearImgBtn" onclick="clearImage()" style="margin-bottom:14px">Remove photo</button>
+
+          <div class="field"><label for="fName">Name</label><input id="fName" required></div>
+          <div class="field-row">
+            <div class="field"><label for="fCategory">Category</label><input id="fCategory" list="catList" required placeholder="e.g. Amigurumi"><datalist id="catList"></datalist></div>
+            <div class="field"><label for="fPrice">Price ($)</label><input id="fPrice" type="number" step="0.01" min="0" required></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="fStock">Stock</label><input id="fStock" type="number" min="0" value="5"></div>
+            <div class="field"><label for="fHours">Hours to make</label><input id="fHours" type="number" step="0.5" min="0" value="4"></div>
+          </div>
+          <div class="field"><label for="fYarn">Yarn weight</label><input id="fYarn" value="DK (8-ply)"></div>
+          <div class="field-row">
+            <div class="field"><label for="fColor">Swatch colour</label><input id="fColor" type="color" value="#9C4B4B"></div>
+            <div class="field"><label for="fPattern">Swatch stitch</label>
+              <select id="fPattern"><option value="granny">Granny</option><option value="shell">Shell</option><option value="chevron">Chevron</option><option value="ripple">Ripple</option></select>
+            </div>
+          </div>
+          <div class="field"><label for="fDesc">Description</label><textarea id="fDesc" rows="4"></textarea></div>
+          <button class="btn block" type="submit" id="saveBtn">Add product</button>
+          <button class="btn outline block hidden" type="button" id="cancelEditBtn" onclick="resetForm()" style="margin-top:8px">Cancel editing</button>
+          <p class="msg" id="formMsg"></p>
+        </form>
+      </div>
+
+      <div class="adm-card">
+        <h3>Your products <span id="prodCount" style="color:var(--ink-soft);font-weight:400;font-size:14px"></span></h3>
+        <div id="prodList">Loading…</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="ordersTab" class="hidden">
+    <div id="orderList">Loading…</div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+var TOKEN = sessionStorage.getItem('hh_admin_token') || '';
+var editingId = null;
+var imageData = null;      // base64 data URL of a newly chosen photo
+var clearImg = false;      // user asked to remove the existing photo
+var existingImage = null;  // current photo path of the product being edited
+var allProducts = [];
+
+function adminFetch(method, url, body) {
+  return fetch('/api/admin' + url, {
+    method: method,
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': TOKEN },
+    body: body ? JSON.stringify(body) : undefined
+  }).then(function (r) {
+    return r.json().then(function (data) {
+      if (r.status === 401) { logout(true); }
+      if (!r.ok) throw new Error(data.error || 'Request failed');
+      return data;
+    });
+  }).catch(function (e) {
+    if (e instanceof TypeError) throw new Error('Cannot reach the server. The admin panel needs the Node backend (node server.js).');
+    throw e;
+  });
+}
+
+function setMsg(id, text, cls) {
+  var el = document.getElementById(id);
+  el.textContent = text || '';
+  el.className = 'msg ' + (cls || '');
+}
+
+/* ---------- login ---------- */
+function doLogin(e) {
+  e.preventDefault();
+  setMsg('loginMsg', 'Checking…');
+  fetch('/api/admin/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: document.getElementById('pw').value })
+  }).then(function (r) {
+    return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Login failed'); return d; });
+  }).then(function (d) {
+    TOKEN = d.token; sessionStorage.setItem('hh_admin_token', TOKEN);
+    setMsg('loginMsg', '');
+    enterPanel();
+  }).catch(function (err) {
+    setMsg('loginMsg', err instanceof TypeError ? 'Cannot reach the server. Start it with: node server.js' : err.message, 'err');
+  });
+}
+
+function logout(silent) {
+  TOKEN = ''; sessionStorage.removeItem('hh_admin_token');
+  document.getElementById('panel').classList.add('hidden');
+  document.getElementById('logoutBtn').classList.add('hidden');
+  document.getElementById('loginBox').classList.remove('hidden');
+  if (silent) setMsg('loginMsg', 'Session expired — please log in again.', 'err');
+}
+
+function enterPanel() {
+  document.getElementById('loginBox').classList.add('hidden');
+  document.getElementById('panel').classList.remove('hidden');
+  document.getElementById('logoutBtn').classList.remove('hidden');
+  loadProducts();
+}
+
+function showTab(t) {
+  document.getElementById('productsTab').classList.toggle('hidden', t !== 'products');
+  document.getElementById('ordersTab').classList.toggle('hidden', t !== 'orders');
+  document.getElementById('tabProducts').classList.toggle('on', t === 'products');
+  document.getElementById('tabOrders').classList.toggle('on', t === 'orders');
+  if (t === 'orders') loadOrders();
+}
+
+/* ---------- products ---------- */
+function loadProducts() {
+  fetch('/api/products').then(function (r) { return r.json(); }).then(function (list) {
+    allProducts = list;
+    document.getElementById('prodCount').textContent = '(' + list.length + ')';
+    var cats = {};
+    list.forEach(function (p) { cats[p.category] = 1; });
+    document.getElementById('catList').innerHTML = Object.keys(cats).map(function (c) { return '<option value="' + escapeHtml(c) + '">'; }).join('');
+    document.getElementById('prodList').innerHTML = list.length ? list.map(function (p) {
+      return '<div class="prod-row">' +
+        '<div class="thumb">' + productVisual(p) + '</div>' +
+        '<div><h4>' + escapeHtml(p.name) + '</h4><div class="sub">' + escapeHtml(p.category) + ' · ' + formatPrice(p.price) + ' · stock ' + p.stock + '</div></div>' +
+        '<div class="row-actions"><button class="btn outline small" onclick="editProduct(' + p.id + ')">Edit</button>' +
+        '<button class="btn small berry" onclick="deleteProduct(' + p.id + ')">Delete</button></div>' +
+      '</div>';
+    }).join('') : '<p style="color:var(--ink-soft)">No products yet — add your first one on the left.</p>';
+  }).catch(function (e) {
+    document.getElementById('prodList').innerHTML = '<p class="msg err">Could not load products: ' + escapeHtml(e.message) + '</p>';
+  });
+}
+
+function showPreview(src) {
+  var box = document.getElementById('imgPreview');
+  box.innerHTML = src ? '<img src="' + src + '" alt="">' : 'No photo — a crochet swatch is shown instead';
+  document.getElementById('clearImgBtn').classList.toggle('hidden', !src);
+}
+
+/* Shrinks the chosen photo to max 1000px so uploads stay small and fast */
+function pickImage(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function () {
+    var img = new Image();
+    img.onload = function () {
+      var max = 1000, scale = Math.min(1, max / Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      imageData = c.toDataURL('image/jpeg', 0.85);
+      clearImg = false;
+      showPreview(imageData);
+    };
+    img.onerror = function () { setMsg('formMsg', 'That file is not a valid image.', 'err'); };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearImage() {
+  imageData = null; clearImg = !!existingImage;
+  document.getElementById('fImage').value = '';
+  showPreview(null);
+}
+
+function resetForm() {
+  editingId = null; imageData = null; clearImg = false; existingImage = null;
+  document.getElementById('prodForm').reset();
+  document.getElementById('fStock').value = 5; document.getElementById('fHours').value = 4;
+  document.getElementById('fYarn').value = 'DK (8-ply)'; document.getElementById('fColor').value = '#9C4B4B';
+  document.getElementById('formTitle').textContent = 'Add a product';
+  document.getElementById('saveBtn').textContent = 'Add product';
+  document.getElementById('cancelEditBtn').classList.add('hidden');
+  showPreview(null); setMsg('formMsg', '');
+}
+
+function editProduct(id) {
+  var p = allProducts.filter(function (x) { return x.id === id; })[0];
+  if (!p) return;
+  editingId = id; imageData = null; clearImg = false; existingImage = p.image || null;
+  document.getElementById('fName').value = p.name;
+  document.getElementById('fCategory').value = p.category;
+  document.getElementById('fPrice').value = p.price;
+  document.getElementById('fStock').value = p.stock;
+  document.getElementById('fHours').value = p.hours;
+  document.getElementById('fYarn').value = p.yarn_weight;
+  document.getElementById('fColor').value = p.color;
+  document.getElementById('fPattern').value = p.pattern;
+  document.getElementById('fDesc').value = p.description;
+  document.getElementById('fImage').value = '';
+  showPreview(p.image || null);
+  document.getElementById('formTitle').textContent = 'Edit product #' + id;
+  document.getElementById('saveBtn').textContent = 'Save changes';
+  document.getElementById('cancelEditBtn').classList.remove('hidden');
+  setMsg('formMsg', '');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function saveProduct(e) {
+  e.preventDefault();
+  var body = {
+    name: document.getElementById('fName').value,
+    category: document.getElementById('fCategory').value,
+    price: document.getElementById('fPrice').value,
+    stock: document.getElementById('fStock').value,
+    hours: document.getElementById('fHours').value,
+    yarn_weight: document.getElementById('fYarn').value,
+    color: document.getElementById('fColor').value,
+    pattern: document.getElementById('fPattern').value,
+    description: document.getElementById('fDesc').value
+  };
+  if (imageData) body.image = imageData;
+  if (clearImg) body.clearImage = true;
+
+  var btn = document.getElementById('saveBtn');
+  btn.disabled = true; setMsg('formMsg', 'Saving…');
+  var req = editingId ? adminFetch('PUT', '/products/' + editingId, body) : adminFetch('POST', '/products', body);
+  req.then(function () {
+    var wasEdit = !!editingId;
+    resetForm(); loadProducts();
+    setMsg('formMsg', wasEdit ? 'Changes saved ✓' : 'Product added ✓', 'ok');
+  }).catch(function (err) {
+    setMsg('formMsg', err.message, 'err');
+  }).then(function () { btn.disabled = false; });
+}
+
+function deleteProduct(id) {
+  var p = allProducts.filter(function (x) { return x.id === id; })[0];
+  if (!p || !confirm('Delete "' + p.name + '"? This cannot be undone.')) return;
+  adminFetch('DELETE', '/products/' + id).then(function () {
+    if (editingId === id) resetForm();
+    loadProducts();
+  }).catch(function (err) { alert(err.message); });
+}
+
+/* ---------- orders ---------- */
+function loadOrders() {
+  adminFetch('GET', '/orders').then(function (orders) {
+    var el = document.getElementById('orderList');
+    if (!orders.length) { el.innerHTML = '<p style="color:var(--ink-soft)">No orders yet.</p>'; return; }
+    var statuses = ['placed', 'making', 'shipped', 'delivered', 'cancelled'];
+    el.innerHTML = orders.map(function (o) {
+      return '<div class="order-card">' +
+        '<div class="order-head"><span class="num">' + escapeHtml(o.order_number) + '</span>' +
+        '<span style="color:var(--ink-soft);font-size:13px">' + escapeHtml(o.created_at) + ' UTC</span></div>' +
+        '<p><strong>' + escapeHtml(o.name) + '</strong> · ' + escapeHtml(o.email) + (o.phone ? ' · ' + escapeHtml(o.phone) : '') + '</p>' +
+        '<p style="font-size:14px;color:var(--ink-soft)">' + escapeHtml(o.address) + ', ' + escapeHtml(o.city) + '</p>' +
+        (o.notes ? '<p style="font-size:14px;margin-top:6px"><em>Note:</em> ' + escapeHtml(o.notes) + '</p>' : '') +
+        '<div style="margin:12px 0">' + o.items.map(function (i) {
+          return '<div class="mini-item"><span>' + escapeHtml(i.name) + ' × ' + i.qty + '</span><span>' + formatPrice(i.price * i.qty) + '</span></div>';
+        }).join('') + '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">' +
+          '<strong>Total ' + formatPrice(o.total) + '</strong>' +
+          '<select onchange="setStatus(' + o.id + ', this.value)" style="padding:8px 12px;border:1.5px solid var(--line);border-radius:3px">' +
+            statuses.map(function (s) { return '<option value="' + s + '"' + (s === o.status ? ' selected' : '') + '>' + s + '</option>'; }).join('') +
+          '</select>' +
+        '</div></div>';
+    }).join('');
+  }).catch(function (err) {
+    document.getElementById('orderList').innerHTML = '<p class="msg err">' + escapeHtml(err.message) + '</p>';
+  });
+}
+
+function setStatus(id, status) {
+  adminFetch('PUT', '/orders/' + id, { status: status }).then(function () { toast('Order updated'); })
+    .catch(function (err) { toast(err.message); });
+}
+
+if (TOKEN) enterPanel();
+</script>
+</body>
+</html>

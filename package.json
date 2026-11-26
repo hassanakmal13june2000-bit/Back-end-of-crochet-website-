@@ -1,0 +1,13 @@
+{
+  "name": "hook-and-hearth",
+  "version": "1.0.0",
+  "description": "Hook & Hearth — a handmade crochet store with a Node.js backend, SQLite database, cart, and checkout.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,278 @@
+/* ===========================================================
+   HOOK & HEARTH — design tokens
+   Paper #F3ECE0 · Ink #2E2621 · Berry #9C4B4B · Moss #5C6B47
+   Mustard #C99A3E · Denim #48607A
+   Display: Fraunces (soft) · Body: Karla · Utility: JetBrains Mono
+   =========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+:root{
+  --paper:#F3ECE0;
+  --paper-2:#EAE1D2;
+  --ink:#2E2621;
+  --ink-soft:#6B6055;
+  --berry:#9C4B4B;
+  --berry-dark:#7E3B3B;
+  --moss:#5C6B47;
+  --mustard:#C99A3E;
+  --denim:#48607A;
+  --line:#DCD1BC;
+  --radius:3px;
+  --shadow:0 6px 24px rgba(46,38,33,0.10);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Karla',sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  font-size:16px;
+  line-height:1.6;
+}
+a{color:inherit;text-decoration:none}
+ul{list-style:none}
+img{max-width:100%;display:block}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+
+h1,h2,h3,h4{
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  line-height:1.15;
+  letter-spacing:-0.01em;
+}
+
+.eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--berry);
+}
+
+.container{max-width:1180px;margin:0 auto;padding:0 24px}
+
+/* ---------- Chain-stitch scalloped divider (signature device) ---------- */
+.stitch-divider{
+  height:14px;
+  width:100%;
+  background-image:radial-gradient(circle at 7px 0px, transparent 7px, var(--paper) 7.5px);
+  background-size:14px 14px;
+  background-repeat:repeat-x;
+  background-position:center top;
+}
+.stitch-divider.flip{transform:scaleY(-1)}
+.stitch-divider.on-paper2{background-image:radial-gradient(circle at 7px 0px, transparent 7px, var(--paper-2) 7.5px)}
+.stitch-divider.on-ink{background-image:radial-gradient(circle at 7px 0px, transparent 7px, var(--ink) 7.5px)}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 26px;
+  font-family:'Karla',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.03em;
+  border:2px solid var(--ink);border-radius:var(--radius);
+  background:var(--ink);color:var(--paper);
+  transition:transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.btn:hover{background:var(--berry);border-color:var(--berry);transform:translateY(-1px)}
+.btn.outline{background:transparent;color:var(--ink)}
+.btn.outline:hover{background:var(--ink);color:var(--paper)}
+.btn.berry{background:var(--berry);border-color:var(--berry)}
+.btn.berry:hover{background:var(--berry-dark);border-color:var(--berry-dark)}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.btn.block{width:100%}
+.btn.small{padding:9px 16px;font-size:12px}
+
+/* ---------- Header ---------- */
+.site-header{
+  position:sticky;top:0;z-index:100;
+  background:var(--paper);
+  border-bottom:1px solid var(--line);
+}
+.site-header .bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;max-width:1180px;margin:0 auto;
+}
+.wordmark{
+  font-family:'Fraunces',serif;font-weight:700;font-size:22px;letter-spacing:-0.01em;
+}
+.wordmark .amp{color:var(--berry);font-style:italic}
+.main-nav{display:flex;align-items:center;gap:32px}
+.main-nav a{font-size:14px;font-weight:600;position:relative}
+.main-nav a::after{
+  content:'';position:absolute;left:0;bottom:-4px;width:0;height:2px;background:var(--berry);
+  transition:width 0.2s ease;
+}
+.main-nav a:hover::after{width:100%}
+.nav-icons{display:flex;align-items:center;gap:18px}
+.cart-link{position:relative;font-size:20px}
+.cart-badge{
+  position:absolute;top:-8px;right:-10px;background:var(--berry);color:#fff;
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+  width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+}
+.mob-toggle{display:none;font-size:22px;background:none;border:none}
+
+@media(max-width:800px){
+  .main-nav{display:none}
+  .mob-toggle{display:block}
+}
+
+/* ---------- Hero (yarn shelf) ---------- */
+.hero{
+  padding:64px 0 40px;
+  background:var(--paper);
+}
+.hero-inner{
+  display:grid;grid-template-columns:1.1fr 0.9fr;gap:48px;align-items:center;
+}
+.hero h1{font-size:clamp(38px,5vw,58px);margin:14px 0 18px}
+.hero p{color:var(--ink-soft);font-size:17px;max-width:44ch;margin-bottom:28px}
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap}
+
+/* shelf of swatches */
+.yarn-shelf{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+}
+.yarn-shelf .swatch-wrap{aspect-ratio:1;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.yarn-shelf .swatch-wrap:nth-child(2){transform:translateY(18px)}
+.yarn-shelf .swatch-wrap:nth-child(5){transform:translateY(-14px)}
+
+@media(max-width:800px){
+  .hero-inner{grid-template-columns:1fr}
+  .yarn-shelf{margin-top:12px}
+}
+
+/* ---------- Sections ---------- */
+section{padding:56px 0}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px}
+.section-head h2{font-size:32px}
+.section-head .eyebrow{display:block;margin-bottom:6px}
+
+/* ---------- Product grid & cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:720px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:460px){.grid{grid-template-columns:1fr}}
+
+.card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;
+  display:flex;flex-direction:column;transition:box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card:hover{box-shadow:var(--shadow);transform:translateY(-3px)}
+.card .swatch-wrap{aspect-ratio:4/5;position:relative}
+.card .cat-tag{
+  position:absolute;top:10px;left:10px;background:rgba(255,255,255,0.9);
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;
+  padding:4px 8px;border-radius:2px;color:var(--ink-soft);
+}
+.card .body{padding:16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card h3{font-size:17px;font-weight:600}
+.card .price{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--berry);font-size:15px}
+.card .meta{font-size:12px;color:var(--ink-soft)}
+.card .add-row{margin-top:auto;padding-top:10px}
+
+/* ---------- Granny-square swatch SVG styling ---------- */
+.swatch-wrap svg{width:100%;height:100%;display:block}
+
+/* ---------- Breadcrumb ---------- */
+.crumb{font-size:13px;color:var(--ink-soft);margin-bottom:18px}
+.crumb a:hover{color:var(--berry)}
+
+/* ---------- Product detail ---------- */
+.pdp{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+@media(max-width:800px){.pdp{grid-template-columns:1fr;gap:32px}}
+.pdp .swatch-wrap{aspect-ratio:1;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.pdp-title{font-size:34px;margin:10px 0 6px}
+.pdp-price{font-family:'JetBrains Mono',monospace;color:var(--berry);font-size:22px;margin-bottom:18px}
+.pdp-desc{color:var(--ink-soft);margin-bottom:22px;max-width:52ch}
+.spec-row{display:flex;gap:28px;flex-wrap:wrap;margin-bottom:26px;padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.spec{display:flex;flex-direction:column;gap:4px}
+.spec .label{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft)}
+.spec .val{font-weight:600}
+.qty-row{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.qty-box{display:flex;align-items:center;border:2px solid var(--ink);border-radius:var(--radius)}
+.qty-box button{width:38px;height:44px;background:none;border:none;font-size:18px}
+.qty-box input{width:40px;text-align:center;border:none;background:none;font-weight:700}
+.stock-note{font-size:13px;color:var(--moss);margin-bottom:20px}
+.stock-note.low{color:var(--berry)}
+
+/* ---------- Cart page ---------- */
+.cart-wrap{display:grid;grid-template-columns:1fr 340px;gap:40px;align-items:start}
+@media(max-width:800px){.cart-wrap{grid-template-columns:1fr}}
+.cart-row{display:grid;grid-template-columns:70px 1fr auto auto auto;gap:16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.cart-row .thumb{width:70px;height:70px;border-radius:var(--radius);overflow:hidden}
+.cart-row h4{font-size:15px;font-weight:600}
+.cart-row .cat{font-size:12px;color:var(--ink-soft)}
+.cart-row .remove{background:none;border:none;color:var(--ink-soft);font-size:18px}
+.cart-row .remove:hover{color:var(--berry)}
+.summary-box{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.summary-box h3{margin-bottom:16px;font-size:18px}
+.summary-line{display:flex;justify-content:space-between;font-size:14px;padding:6px 0}
+.summary-line.total{font-weight:700;font-size:16px;border-top:1px solid var(--line);margin-top:8px;padding-top:14px}
+.empty-note{padding:60px 20px;text-align:center;color:var(--ink-soft)}
+.empty-note .btn{margin-top:16px}
+
+/* ---------- Checkout form ---------- */
+.checkout-wrap{display:grid;grid-template-columns:1.2fr 0.8fr;gap:48px;align-items:start}
+@media(max-width:800px){.checkout-wrap{grid-template-columns:1fr}}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.field input,.field textarea{
+  width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius);
+  background:#fff;
+}
+.field input:focus,.field textarea:focus{outline:2px solid var(--berry);outline-offset:1px;border-color:var(--berry)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:520px){.field-row{grid-template-columns:1fr}}
+.mini-item{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--line)}
+
+/* ---------- Confirmation ---------- */
+.confirm-box{max-width:560px;margin:0 auto;text-align:center;padding:60px 20px}
+.confirm-box .stitch-icon{font-size:48px;margin-bottom:18px}
+.order-number{
+  font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--berry);
+  margin:16px 0;letter-spacing:0.04em;
+}
+
+/* ---------- Footer ---------- */
+.site-footer{background:var(--ink);color:var(--paper-2);padding:48px 0 28px;margin-top:40px}
+.footer-inner{display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;margin-bottom:28px}
+.footer-inner .wordmark{color:var(--paper)}
+.footer-cols{display:flex;gap:56px;flex-wrap:wrap}
+.footer-col h4{font-family:'Karla',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;color:var(--paper-2)}
+.footer-col a{display:block;font-size:14px;color:#B9AE9E;padding:4px 0}
+.footer-col a:hover{color:var(--mustard)}
+.footer-bottom{border-top:1px solid #45392f;padding-top:20px;font-size:12px;color:#8a7d6e;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed;bottom:24px;right:24px;background:var(--ink);color:var(--paper);
+  padding:14px 22px;border-radius:var(--radius);font-size:14px;font-weight:600;
+  z-index:9999;box-shadow:var(--shadow);
+  transform:translateY(120%);transition:transform 0.3s ease;
+}
+.toast.show{transform:translateY(0)}
+
+/* ---------- Filters (shop page) ---------- */
+.shop-layout{display:grid;grid-template-columns:220px 1fr;gap:36px;align-items:start}
+@media(max-width:800px){.shop-layout{grid-template-columns:1fr}}
+.filter-list button{
+  display:block;width:100%;text-align:left;background:none;border:none;padding:8px 0;
+  font-size:14px;color:var(--ink-soft);border-bottom:1px solid var(--line);
+}
+.filter-list button.on{color:var(--berry);font-weight:700}
+.filter-title{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft);margin-bottom:10px}
+
+/* ---------- Utility ---------- */
+.center{text-align:center}
+.mt-40{margin-top:40px}
+.skel{background:linear-gradient(90deg,var(--paper-2) 25%,#f3ede2 50%,var(--paper-2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.reduced-motion, .card, .btn{transition-duration:0.15s}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important;transition:none !important}
+}
+:focus-visible{outline:2px solid var(--denim);outline-offset:2px}

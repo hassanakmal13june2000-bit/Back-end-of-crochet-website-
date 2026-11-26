@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — Hook &amp; Hearth</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="wordmark">Hook <span class="amp">&amp;</span> Hearth</a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="index.html#about">Our Craft</a>
+    </nav>
+    <div class="nav-icons">
+      <a href="cart.html" class="cart-link" aria-label="Cart">🧺<span class="cart-badge">0</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="container" style="padding-top:28px;padding-bottom:60px">
+  <h1 style="font-size:34px;margin-bottom:26px">Checkout</h1>
+
+  <div class="checkout-wrap" id="checkoutWrap">
+    <form id="checkoutForm">
+      <div class="field-row">
+        <div class="field"><label for="name">Full name</label><input id="name" required></div>
+        <div class="field"><label for="email">Email</label><input id="email" type="email" required></div>
+      </div>
+      <div class="field"><label for="phone">Phone (optional)</label><input id="phone"></div>
+      <div class="field"><label for="address">Shipping address</label><input id="address" required></div>
+      <div class="field"><label for="city">City</label><input id="city" required></div>
+      <div class="field"><label for="notes">Order notes (optional)</label><textarea id="notes" rows="3" placeholder="Gift wrap, colour preferences, delivery instructions…"></textarea></div>
+      <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px">Payment: cash on delivery. You'll receive a confirmation with your order number after placing the order.</p>
+      <button type="submit" class="btn block" id="placeBtn">Place order</button>
+    </form>
+
+    <div class="summary-box" id="summaryBox">
+      <h3>Order summary</h3>
+      <p style="color:var(--ink-soft)">Loading…</p>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 Hook &amp; Hearth.</span>
+      <span>Care: hand wash cold, lay flat to dry.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+var currentCart = null;
+
+function renderSummary(cart){
+  currentCart = cart;
+  var box = document.getElementById('summaryBox');
+  if (!cart.items.length){
+    box.innerHTML = '<h3>Order summary</h3><p style="color:var(--ink-soft)">Your cart is empty.</p><a class="btn outline block" href="shop.html" style="margin-top:12px">Browse the shop</a>';
+    document.getElementById('placeBtn').disabled = true;
+    return;
+  }
+  var shipping = cart.subtotal >= 75 ? 0 : 6.5;
+  var total = cart.subtotal + shipping;
+  box.innerHTML = '' +
+    '<h3>Order summary</h3>' +
+    cart.items.map(function(i){
+      return '<div class="mini-item"><span>' + escapeHtml(i.name) + ' × ' + i.qty + '</span><span>' + formatPrice(i.price * i.qty) + '</span></div>';
+    }).join('') +
+    '<div class="summary-line"><span>Subtotal</span><span>' + formatPrice(cart.subtotal) + '</span></div>' +
+    '<div class="summary-line"><span>Shipping</span><span>' + (shipping === 0 ? 'Free' : formatPrice(shipping)) + '</span></div>' +
+    '<div class="summary-line total"><span>Total</span><span>' + formatPrice(total) + '</span></div>';
+}
+
+fetchCart().then(renderSummary).catch(function(err){
+  document.getElementById('summaryBox').innerHTML = '<p style="color:var(--berry)">Could not load cart: ' + escapeHtml(err.message) + '</p>';
+});
+
+document.getElementById('checkoutForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  if (!currentCart || !currentCart.items.length) return;
+  var btn = document.getElementById('placeBtn');
+  btn.disabled = true;
+  btn.textContent = 'Placing order…';
+
+  checkout({
+    name: document.getElementById('name').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    address: document.getElementById('address').value.trim(),
+    city: document.getElementById('city').value.trim(),
+    notes: document.getElementById('notes').value.trim()
+  }).then(function(result){
+    window.location.href = 'confirmation.html?order=' + result.orderId;
+  }).catch(function(err){
+    toast('Could not place order: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'Place order';
+  });
+});
+</script>
+</body>
+</html>

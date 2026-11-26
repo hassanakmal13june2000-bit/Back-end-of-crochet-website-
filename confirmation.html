@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order confirmed — Hook &amp; Hearth</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="wordmark">Hook <span class="amp">&amp;</span> Hearth</a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+    </nav>
+    <div class="nav-icons">
+      <a href="cart.html" class="cart-link" aria-label="Cart">🧺<span class="cart-badge">0</span></a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="confirm-box" id="confirmBox">
+    <p style="color:var(--ink-soft)">Loading your order…</p>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 Hook &amp; Hearth.</span>
+      <span>Care: hand wash cold, lay flat to dry.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+var params = new URLSearchParams(window.location.search);
+var orderId = params.get('order');
+var box = document.getElementById('confirmBox');
+
+if (!orderId){
+  box.innerHTML = '<p>No order to show.</p><a class="btn" href="shop.html">Browse the shop</a>';
+} else {
+  fetchOrder(orderId).then(function(order){
+    box.innerHTML = '' +
+      '<div class="stitch-icon">🧶</div>' +
+      '<h1>Thank you, ' + escapeHtml(order.name.split(' ')[0]) + '.</h1>' +
+      '<p style="color:var(--ink-soft);margin-top:8px">Your order has been placed and will be hand-made to order.</p>' +
+      '<div class="order-number">' + escapeHtml(order.order_number) + '</div>' +
+      '<div style="text-align:left;max-width:380px;margin:24px auto" id="orderItems"></div>' +
+      '<div class="summary-line total" style="max-width:380px;margin:0 auto 24px"><span>Total</span><span>' + formatPrice(order.total) + '</span></div>' +
+      '<p style="color:var(--ink-soft);font-size:14px;margin-bottom:24px">A confirmation has been noted for <strong>' + escapeHtml(order.email) + '</strong>. Payment is cash on delivery.</p>' +
+      '<a class="btn" href="shop.html">Continue shopping</a>';
+    document.getElementById('orderItems').innerHTML = order.items.map(function(i){
+      return '<div class="mini-item"><span>' + escapeHtml(i.name) + ' × ' + i.qty + '</span><span>' + formatPrice(i.price * i.qty) + '</span></div>';
+    }).join('');
+  }).catch(function(err){
+    box.innerHTML = '<p style="color:var(--berry)">' + escapeHtml(err.message) + '</p><a class="btn" href="shop.html">Browse the shop</a>';
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop — Hook &amp; Hearth</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="wordmark">Hook <span class="amp">&amp;</span> Hearth</a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="index.html#about">Our Craft</a>
+    </nav>
+    <div class="nav-icons">
+      <a href="cart.html" class="cart-link" aria-label="Cart">🧺<span class="cart-badge">0</span></a>
+      <button class="mob-toggle" onclick="toggleMobNav()" aria-label="Menu">☰</button>
+    </div>
+  </div>
+  <nav id="mobNav" style="display:none;flex-direction:column;padding:0 24px 18px;gap:14px">
+    <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="index.html#about">Our Craft</a>
+  </nav>
+</header>
+
+<div class="container" style="padding-top:36px">
+  <span class="eyebrow">The full catalog</span>
+  <h1 style="font-size:36px;margin:8px 0 30px">Shop all pieces</h1>
+</div>
+
+<div class="container">
+  <div class="shop-layout">
+    <aside class="filter-list">
+      <div class="filter-title">Category</div>
+      <button class="on" data-cat="">All pieces</button>
+      <button data-cat="Amigurumi">Amigurumi</button>
+      <button data-cat="Blankets & Throws">Blankets &amp; throws</button>
+      <button data-cat="Wearables">Wearables</button>
+      <button data-cat="Home & Table">Home &amp; table</button>
+      <button data-cat="Baby & Kids">Baby &amp; kids</button>
+      <button data-cat="Accessories">Accessories</button>
+    </aside>
+    <div>
+      <p id="resultsCount" style="color:var(--ink-soft);font-size:14px;margin-bottom:18px">Loading…</p>
+      <div class="grid" id="grid">
+        <p class="center" style="grid-column:1/-1;color:var(--ink-soft)">Loading pieces…</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stitch-divider mt-40" aria-hidden="true"></div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="wordmark">Hook <span class="amp" style="color:var(--mustard)">&amp;</span> Hearth</div>
+        <p style="max-width:32ch;color:#B9AE9E;margin-top:10px;font-size:14px">Small-batch crochet, made one row at a time in a home studio.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Shop</h4>
+          <a href="shop.html">All pieces</a>
+          <a href="shop.html?category=Amigurumi">Amigurumi</a>
+        </div>
+        <div class="footer-col">
+          <h4>Help</h4>
+          <a href="cart.html">Your cart</a>
+          <a href="mailto:hello@hookandhearth.example">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Hook &amp; Hearth.</span>
+      <span>Care: hand wash cold, lay flat to dry.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+function toggleMobNav(){
+  var el = document.getElementById('mobNav');
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+function productCard(p){
+  return '' +
+    '<a class="card" href="product.html?id=' + p.id + '">' +
+      '<div class="swatch-wrap">' + productVisual(p) +
+        '<span class="cat-tag">' + escapeHtml(p.category) + '</span>' +
+      '</div>' +
+      '<div class="body">' +
+        '<h3>' + escapeHtml(p.name) + '</h3>' +
+        '<span class="meta">' + escapeHtml(p.yarn_weight) + ' · ' + p.hours + 'h to make</span>' +
+        '<span class="price">' + formatPrice(p.price) + '</span>' +
+      '</div>' +
+    '</a>';
+}
+
+function loadShop(category){
+  document.getElementById('resultsCount').textContent = 'Loading…';
+  fetchProducts(category).then(function(products){
+    document.getElementById('grid').innerHTML = products.length
+      ? products.map(productCard).join('')
+      : '<p class="center" style="grid-column:1/-1;color:var(--ink-soft)">No pieces in this category yet.</p>';
+    document.getElementById('resultsCount').textContent = products.length + ' piece' + (products.length === 1 ? '' : 's');
+  }).catch(function(err){
+    document.getElementById('grid').innerHTML = '<p class="center" style="grid-column:1/-1;color:var(--berry)">Could not load products: ' + escapeHtml(err.message) + '</p>';
+    document.getElementById('resultsCount').textContent = '';
+  });
+}
+
+var params = new URLSearchParams(window.location.search);
+var initialCat = params.get('category') || '';
+
+document.querySelectorAll('.filter-list button').forEach(function(btn){
+  if (btn.dataset.cat === initialCat) btn.classList.add('on'); else btn.classList.remove('on');
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.filter-list button').forEach(function(b){ b.classList.remove('on'); });
+    btn.classList.add('on');
+    var cat = btn.dataset.cat;
+    var url = cat ? ('shop.html?category=' + encodeURIComponent(cat)) : 'shop.html';
+    history.replaceState(null, '', url);
+    loadShop(cat);
+  });
+});
+
+loadShop(initialCat);
+</script>
+</body>
+</html>

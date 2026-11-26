@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Cart — Hook &amp; Hearth</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a href="index.html" class="wordmark">Hook <span class="amp">&amp;</span> Hearth</a>
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="index.html#about">Our Craft</a>
+    </nav>
+    <div class="nav-icons">
+      <a href="cart.html" class="cart-link" aria-label="Cart">🧺<span class="cart-badge">0</span></a>
+      <button class="mob-toggle" onclick="toggleMobNav()" aria-label="Menu">☰</button>
+    </div>
+  </div>
+  <nav id="mobNav" style="display:none;flex-direction:column;padding:0 24px 18px;gap:14px">
+    <a href="index.html">Home</a><a href="shop.html">Shop</a><a href="index.html#about">Our Craft</a>
+  </nav>
+</header>
+
+<div class="container" style="padding-top:28px;padding-bottom:60px">
+  <h1 style="font-size:34px;margin-bottom:26px">Your cart</h1>
+  <div id="cartWrap">
+    <p style="color:var(--ink-soft)">Loading your cart…</p>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 Hook &amp; Hearth.</span>
+      <span>Care: hand wash cold, lay flat to dry.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script>
+function toggleMobNav(){
+  var el = document.getElementById('mobNav');
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+function cartRow(item){
+  return '' +
+    '<div class="cart-row" id="row-' + item.id + '">' +
+      '<div class="thumb">' + productVisual(item) + '</div>' +
+      '<div><h4><a href="product.html?id=' + item.id + '">' + escapeHtml(truncate(item.name,50)) + '</a></h4><div class="cat">' + escapeHtml(titleCase(item.category || '')) + '</div></div>' +
+      '<div class="qty-box">' +
+        '<button onclick="changeQty(' + item.id + ',-1,' + item.qty + ')">−</button>' +
+        '<input value="' + item.qty + '" readonly>' +
+        '<button onclick="changeQty(' + item.id + ',1,' + item.qty + ')">+</button>' +
+      '</div>' +
+      '<div style="font-family:\'JetBrains Mono\',monospace;font-weight:600">' + formatPrice(item.price * item.qty) + '</div>' +
+      '<button class="remove" onclick="removeItem(' + item.id + ')" aria-label="Remove">✕</button>' +
+    '</div>';
+}
+
+function render(cart){
+  var wrap = document.getElementById('cartWrap');
+  if (!cart.items.length){
+    wrap.innerHTML = '<div class="empty-note"><p>Your cart is empty — no stitches in here yet.</p><a class="btn" href="shop.html">Browse the shop</a></div>';
+    return;
+  }
+  var shipping = cart.subtotal >= 75 ? 0 : 6.5;
+  var total = cart.subtotal + shipping;
+  wrap.innerHTML = '' +
+    '<div class="cart-wrap">' +
+      '<div>' + cart.items.map(cartRow).join('') + '</div>' +
+      '<div class="summary-box">' +
+        '<h3>Order summary</h3>' +
+        '<div class="summary-line"><span>Subtotal</span><span>' + formatPrice(cart.subtotal) + '</span></div>' +
+        '<div class="summary-line"><span>Shipping</span><span>' + (shipping === 0 ? 'Free' : formatPrice(shipping)) + '</span></div>' +
+        '<div class="summary-line total"><span>Total</span><span>' + formatPrice(total) + '</span></div>' +
+        '<a href="checkout.html" class="btn block" style="margin-top:16px">Checkout</a>' +
+        '<a href="shop.html" class="btn outline block" style="margin-top:10px">Keep browsing</a>' +
+      '</div>' +
+    '</div>';
+}
+
+function load(){
+  fetchCart().then(render).catch(function(err){
+    document.getElementById('cartWrap').innerHTML = '<p style="color:var(--berry)">Could not load cart: ' + escapeHtml(err.message) + '</p>';
+  });
+}
+
+function changeQty(id, delta, current){
+  var next = current + delta;
+  if (next < 1){ removeItem(id); return; }
+  updateCartItem(id, next).then(render);
+}
+
+function removeItem(id){
+  removeCartItem(id).then(render).then(function(){ toast('Removed from cart'); });
+}
+
+load();
+</script>
+</body>
+</html>
